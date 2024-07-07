@@ -1,0 +1,30 @@
+.input {
+  display: none;
+}
+
+.input + label {
+  display: flex;
+  align-items: center;
+  user-select: none;
+  font-family: StratosSkyeng;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.input + label::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  background-color: #fff;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.input:checked + label::before {
+  border-color: #0080c1;
+  background-color: #0080c1;
+}
+
