@@ -1,0 +1,74 @@
+.container {
+  padding: 52px 40px 0px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 571px;
+  margin-bottom: 40px;
+}
+
+.title {
+  color: #fff;
+  font-family: StratosSkyeng;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 32px;
+}
+
+.leadersContainer {
+  background-color: #ffffff;
+  height: 64px;
+  border: none;
+  border-radius: 12px;
+  display: flex;
+  gap: 66px;
+  width: 944px;
+  margin-bottom: 15px;
+  height: auto;
+}
+.leaderPosition {
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 32px;
+  padding: 16px 0px 16px 20px;
+  font-family: StratosSkyeng;
+  width: 178px;
+  display: flex;
+  align-items: center;
+}
+
+.leaderName {
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 32px;
+  padding: 16px 168px 16px 0px;
+  font-family: StratosSkyeng;
+  width: 324px;
+  display: flex;
+  align-items: center;
+}
+
+.leaderTime {
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 32px;
+  padding: 16px 20px 16px 0px;
+  font-family: StratosSkyeng;
+  width: 102px;
+  display: flex;
+  align-items: center;
+}
+
+.gray {
+  color: #999999;
+}
