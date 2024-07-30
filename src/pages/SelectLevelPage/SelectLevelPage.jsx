@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import styles from "./SelectLevelPage.module.css";
 import { useEasyMode } from "../../context/hooks/useEasyMode";
 import Checkbox from "../../components/Checkbox/Checkbox";
+import { LeaderboardLink } from "../../components/LeaderBoardLink/LeaderBoardLink";
 
 export function SelectLevelPage() {
   const { setEasyMode } = useEasyMode();
@@ -29,11 +30,12 @@ export function SelectLevelPage() {
         <Checkbox
           id={"modeCheckbox"}
           name={"modeCheckbox"}
-          label={"Легкий режим"}
+          label={"Легкий режим (3 жизни)"}
           onClick={() => {
             setEasyMode(prev => !prev);
           }}
         />
+        <LeaderboardLink>Перейти к лидерборду</LeaderboardLink>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 .modal {
   width: 480px;
-  height: 459px;
+  height: 634px;
   border-radius: 12px;
   background: #c2f5ff;
   display: flex;
@@ -46,6 +46,39 @@
   font-style: normal;
   font-weight: 400;
   line-height: 72px;
-
   margin-bottom: 40px;
+}
+
+.newLeaderTitle {
+  color: #004980;
+  font-variant-numeric: lining-nums proportional-nums;
+  font-family: StratosSkyeng;
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 48px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.newLeaderName {
+  width: 276px;
+  height: 45px;
+  border: none;
+  border-radius: 10px;
+  margin-bottom: 28px;
+  text-align: center;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+  font-family: StratosSkyeng;
+}
+
+.newLeaderName::placeholder {
+  text-align: center;
+  color: #999999;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+  font-family: StratosSkyeng;
 }
