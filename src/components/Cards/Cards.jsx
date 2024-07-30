@@ -6,6 +6,7 @@ import { EndGameModal } from "../../components/EndGameModal/EndGameModal";
 import { Button } from "../../components/Button/Button";
 import { Card } from "../../components/Card/Card";
 import { useEasyMode } from "../../context/hooks/useEasyMode";
+import { ReactComponent as EpiphanySVG } from "./images/epiphanyPower.svg";
 
 // Игра закончилась
 const STATUS_LOST = "STATUS_LOST";
@@ -46,6 +47,7 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
   const [cards, setCards] = useState([]);
   // Текущий статус игры
   const [status, setStatus] = useState(STATUS_PREVIEW);
+  const [allOpenCards, setAllOpenCards] = useState([]);
 
   // Дата начала игры
   const [gameStartDate, setGameStartDate] = useState(null);
@@ -53,7 +55,10 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
   const [gameEndDate, setGameEndDate] = useState(null);
 
   const { isEasyMode } = useEasyMode();
+
   let [attempts, setAttempts] = useState(isEasyMode ? 3 : 1);
+
+  const [achievements, setAchievements] = useState(isEasyMode ? [2] : [1, 2]);
 
   // Стейт для таймера, высчитывается в setInteval на основе gameStartDate и gameEndDate
   const [timer, setTimer] = useState({
@@ -78,6 +83,8 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
     setTimer(getTimerValue(null, null));
     setStatus(STATUS_PREVIEW);
     setAttempts(isEasyMode ? 3 : 1);
+    setAchievements(isEasyMode ? [2] : [1, 2]);
+    setAllOpenCards([]);
   }
 
   /**
@@ -116,6 +123,7 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
 
     // Открытые карты на игровом поле
     const openCards = nextCards.filter(card => card.open);
+    setAllOpenCards(openCards);
 
     // Ищем открытые карты, у которых нет пары среди других открытых
     const openCardsWithoutPair = openCards.filter(card => {
@@ -147,6 +155,30 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
   };
 
   const isGameEnded = status === STATUS_LOST || status === STATUS_WON;
+  const [usedBonuses, setUsedBonuses] = useState([]);
+  const [epiphanyTime, setEpiphanyTime] = useState(false);
+
+  const epiphanyBonus = () => {
+    if (!usedBonuses.includes(1)) {
+      setUsedBonuses([...usedBonuses, 1]);
+      setEpiphanyTime(true);
+      setAchievements(prev => {
+        if (prev.includes(2)) {
+          prev.pop();
+        }
+        return prev;
+      });
+
+      setCards(cards.map(card => ({ ...card, open: true })));
+      setTimeout(() => {
+        setCards(cards.map(card => (allOpenCards.includes(card) ? { ...card, open: true } : { ...card, open: false })));
+        setEpiphanyTime(false);
+        const newTimer = new Date(gameStartDate);
+        newTimer.setSeconds(newTimer.getSeconds() + 5);
+        setGameStartDate(newTimer);
+      }, 5000);
+    }
+  };
 
   // Игровой цикл
   useEffect(() => {
@@ -177,12 +209,13 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
   // Обновляем значение таймера в интервале
   useEffect(() => {
     const intervalId = setInterval(() => {
+      if (epiphanyTime) return;
       setTimer(getTimerValue(gameStartDate, gameEndDate));
     }, 300);
     return () => {
       clearInterval(intervalId);
     };
-  }, [gameStartDate, gameEndDate]);
+  }, [gameStartDate, gameEndDate, epiphanyTime]);
 
   return (
     <div className={styles.container}>
@@ -208,7 +241,10 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
           )}
         </div>
         {isEasyMode === true && status === STATUS_IN_PROGRESS ? (
-          <p className={styles.timerDescription}>Попыток осталось: {attempts} </p>
+          <p className={styles.timerDescription}>Жизни: {attempts} </p>
+        ) : null}
+        {status === STATUS_IN_PROGRESS ? (
+          <EpiphanySVG className={usedBonuses.includes(1) ? styles.usedBonus : null} onClick={epiphanyBonus} />
         ) : null}
         {status === STATUS_IN_PROGRESS ? <Button onClick={resetGame}>Начать заново</Button> : null}
       </div>
@@ -233,6 +269,7 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
             gameDurationMinutes={timer.minutes}
             onClick={resetGame}
             game={pairsCount}
+            achievements={achievements}
           />
         </div>
       ) : null}
