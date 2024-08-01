@@ -1,5 +1,5 @@
 import { shuffle } from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { generateDeck } from "../../utils/cards";
 import styles from "./Cards.module.css";
 import { EndGameModal } from "../../components/EndGameModal/EndGameModal";
@@ -7,6 +7,7 @@ import { Button } from "../../components/Button/Button";
 import { Card } from "../../components/Card/Card";
 import { useEasyMode } from "../../context/hooks/useEasyMode";
 import { ReactComponent as EpiphanySVG } from "./images/epiphanyPower.svg";
+import { Tooltip } from "../../components/Tooltip/Tooltip";
 
 // Игра закончилась
 const STATUS_LOST = "STATUS_LOST";
@@ -66,10 +67,17 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
     minutes: 0,
   });
 
+  const [tooltip, setTooltip] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [tooltipPlacement, setTooltipPlacement] = useState("top");
+
+  const epiphanyRef = useRef(null);
+
   function finishGame(status = STATUS_LOST) {
     setGameEndDate(new Date());
     setStatus(status);
   }
+
   function startGame() {
     const startDate = new Date();
     setGameEndDate(null);
@@ -77,6 +85,7 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
     setTimer(getTimerValue(startDate, null));
     setStatus(STATUS_IN_PROGRESS);
   }
+
   function resetGame() {
     setGameStartDate(null);
     setGameEndDate(null);
@@ -85,6 +94,7 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
     setAttempts(isEasyMode ? 3 : 1);
     setAchievements(isEasyMode ? [2] : [1, 2]);
     setAllOpenCards([]);
+    setUsedBonuses([]);
   }
 
   /**
@@ -217,6 +227,17 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
     };
   }, [gameStartDate, gameEndDate, epiphanyTime]);
 
+  const handleMouseEnter = e => {
+    const { left, top, height } = epiphanyRef.current.getBoundingClientRect();
+    setTooltipPosition({ top: top + height + 15, left: left - 70 });
+    setTooltipPlacement("bottom");
+    setTooltip("На 5 секунд показываются все карты.  Таймер длительности игры на это время останавливается.");
+  };
+
+  const handleMouseLeave = () => {
+    setTooltip(null);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -244,7 +265,12 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
           <p className={styles.timerDescription}>Жизни: {attempts} </p>
         ) : null}
         {status === STATUS_IN_PROGRESS ? (
-          <EpiphanySVG className={usedBonuses.includes(1) ? styles.usedBonus : null} onClick={epiphanyBonus} />
+          <>
+            <div ref={epiphanyRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+              <EpiphanySVG className={usedBonuses.includes(1) ? styles.usedBonus : null} onClick={epiphanyBonus} />
+            </div>
+            {tooltip && <Tooltip text={tooltip} position={tooltipPosition} placement={tooltipPlacement} />}
+          </>
         ) : null}
         {status === STATUS_IN_PROGRESS ? <Button onClick={resetGame}>Начать заново</Button> : null}
       </div>

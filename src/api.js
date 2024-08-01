@@ -1,4 +1,4 @@
-const baseHost = "https://wedev-api.sky.pro/api/v2/leaderboard";
+const baseHost = "https://wedev-api.sky.pro/api/v2/leaderboard?limit=10";
 
 export async function getLeaders() {
   const response = await fetch(baseHost);

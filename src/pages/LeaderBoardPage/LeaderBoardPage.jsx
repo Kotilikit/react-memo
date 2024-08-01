@@ -8,9 +8,13 @@ import withHardMode from "./images/withHardMode.svg";
 import withoutHardMode from "./images/withoutHardMode.svg";
 import withSuperpower from "./images/withSuperpower.svg";
 import withoutSuperpower from "./images/withoutSuperpower.svg";
+import { Tooltip } from "../../components/Tooltip/Tooltip";
 
 export function LeaderboardPage() {
   const [leaders, setLeaders] = useState([]);
+  const [tooltip, setTooltip] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [tooltipPlacement, setTooltipPlacement] = useState("top");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,6 +29,22 @@ export function LeaderboardPage() {
 
   function onClick() {
     navigate("/");
+  }
+
+  function showTooltip(text, placement, e) {
+    const element = e.currentTarget;
+    const rect = element.getBoundingClientRect();
+
+    setTooltipPosition({
+      top: rect.top - 55 + window.scrollY,
+      left: rect.left + window.scrollX,
+    });
+    setTooltipPlacement(placement);
+    setTooltip(text);
+  }
+
+  function hideTooltip() {
+    setTooltip(null);
   }
 
   return (
@@ -42,21 +62,44 @@ export function LeaderboardPage() {
         </div>
         {leaders
           .sort((a, b) => a.time - b.time)
+          .slice(0, 10)
           .map((leader, index) => (
             <div className={styles.leadersContainer} key={leader.id}>
               <div className={styles.leaderPosition}># {index + 1}</div>
               <div className={styles.leaderName}>{leader.name}</div>
               <div className={styles.achievements}>
-                {leader.achievements.includes(1) ? (
-                  <img src={withHardMode} alt="withHardMode" />
-                ) : (
-                  <img src={withoutHardMode} alt="withoutHardMode" />
-                )}
-                {leader.achievements.includes(2) ? (
-                  <img src={withoutSuperpower} alt="withoutSuperpower" />
-                ) : (
-                  <img src={withSuperpower} alt="withSuperpower" />
-                )}
+                <div
+                  onMouseEnter={e =>
+                    showTooltip(
+                      leader.achievements.includes(1)
+                        ? "Игра пройдена в сложном режиме"
+                        : "Игра пройдена в легком режиме",
+                      "top",
+                      e,
+                    )
+                  }
+                  onMouseLeave={hideTooltip}
+                >
+                  <img
+                    src={leader.achievements.includes(1) ? withHardMode : withoutHardMode}
+                    alt="Hard Mode Achievement"
+                  />
+                </div>
+                <div
+                  onMouseEnter={e =>
+                    showTooltip(
+                      leader.achievements.includes(2) ? "Игра пройдена без суперсил" : "Использована суперсила",
+                      "top",
+                      e,
+                    )
+                  }
+                  onMouseLeave={hideTooltip}
+                >
+                  <img
+                    src={leader.achievements.includes(2) ? withoutSuperpower : withSuperpower}
+                    alt="Superpower Achievement"
+                  />
+                </div>
               </div>
               <div className={styles.leaderTime}>
                 {Math.floor(leader.time / 60)
@@ -69,6 +112,7 @@ export function LeaderboardPage() {
               </div>
             </div>
           ))}
+        {tooltip && <Tooltip text={tooltip} position={tooltipPosition} placement={tooltipPlacement} />}
       </div>
     </>
   );
