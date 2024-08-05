@@ -9,7 +9,7 @@
 .header {
   display: flex;
   align-items: center;
-  gap: 571px;
+  gap: 630px;
   margin-bottom: 40px;
 }
 
@@ -24,7 +24,6 @@
 
 .leadersContainer {
   background-color: #ffffff;
-  height: 64px;
   border: none;
   border-radius: 12px;
   display: flex;
@@ -32,13 +31,13 @@
   width: 944px;
   margin-bottom: 15px;
   height: auto;
+  padding: 16px 35px 16px 20px;
 }
 .leaderPosition {
   font-size: 24px;
   font-style: normal;
   font-weight: 400;
   line-height: 32px;
-  padding: 16px 0px 16px 20px;
   font-family: StratosSkyeng;
   width: 178px;
   display: flex;
@@ -50,9 +49,19 @@
   font-style: normal;
   font-weight: 400;
   line-height: 32px;
-  padding: 16px 168px 16px 0px;
   font-family: StratosSkyeng;
-  width: 324px;
+  display: flex;
+  align-items: center;
+  width: 227px;
+}
+
+.achievements {
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 32px;
+  font-family: StratosSkyeng;
+  width: 230px;
   display: flex;
   align-items: center;
 }
@@ -62,9 +71,8 @@
   font-style: normal;
   font-weight: 400;
   line-height: 32px;
-  padding: 16px 20px 16px 0px;
   font-family: StratosSkyeng;
-  width: 102px;
+  width: 92px;
   display: flex;
   align-items: center;
 }

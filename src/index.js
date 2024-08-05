@@ -4,12 +4,15 @@ import "./index.css";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { EasyModeProvider } from "./context/easyMode";
+import { EpiphanyAchievementProvider } from "./context/epiphanyAchievement";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <EasyModeProvider>
-      <RouterProvider router={router}></RouterProvider>
-    </EasyModeProvider>
+    <EpiphanyAchievementProvider>
+      <EasyModeProvider>
+        <RouterProvider router={router}></RouterProvider>
+      </EasyModeProvider>
+    </EpiphanyAchievementProvider>
   </React.StrictMode>,
 );

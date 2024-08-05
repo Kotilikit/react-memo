@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./SelectLevelPage.module.css";
 import { useEasyMode } from "../../context/hooks/useEasyMode";
 import Checkbox from "../../components/Checkbox/Checkbox";
@@ -6,25 +7,55 @@ import { LeaderboardLink } from "../../components/LeaderBoardLink/LeaderBoardLin
 
 export function SelectLevelPage() {
   const { setEasyMode } = useEasyMode();
+  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const startGame = () => {
+    if (selectedLevel !== null) {
+      navigate(`/game/${selectedLevel}`);
+    } else {
+      setError("Выберите уровень сложности.");
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.modal}>
         <h1 className={styles.title}>Выбери сложность</h1>
         <ul className={styles.levels}>
-          <li className={styles.level}>
-            <Link className={styles.levelLink} to="/game/3">
+          <li className={styles.level} style={{ borderColor: selectedLevel === 3 ? "#004980" : "transparent" }}>
+            <button
+              className={styles.levelLink}
+              onClick={() => {
+                setSelectedLevel(3);
+                setError("");
+              }}
+            >
               1
-            </Link>
+            </button>
           </li>
-          <li className={styles.level}>
-            <Link className={styles.levelLink} to="/game/6">
+          <li className={styles.level} style={{ borderColor: selectedLevel === 6 ? "#004980" : "transparent" }}>
+            <button
+              className={styles.levelLink}
+              onClick={() => {
+                setSelectedLevel(6);
+                setError("");
+              }}
+            >
               2
-            </Link>
+            </button>
           </li>
-          <li className={styles.level}>
-            <Link className={styles.levelLink} to="/game/9">
+          <li className={styles.level} style={{ borderColor: selectedLevel === 9 ? "#004980" : "transparent" }}>
+            <button
+              className={styles.levelLink}
+              onClick={() => {
+                setSelectedLevel(9);
+                setError("");
+              }}
+            >
               3
-            </Link>
+            </button>
           </li>
         </ul>
         <Checkbox
@@ -35,6 +66,10 @@ export function SelectLevelPage() {
             setEasyMode(prev => !prev);
           }}
         />
+        {error && <div className={styles.error}>{error}</div>}
+        <button className={styles.startButton} onClick={startGame}>
+          Начать игру
+        </button>
         <LeaderboardLink>Перейти к лидерборду</LeaderboardLink>
       </div>
     </div>

@@ -1,11 +1,14 @@
 import { shuffle } from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { generateDeck } from "../../utils/cards";
 import styles from "./Cards.module.css";
 import { EndGameModal } from "../../components/EndGameModal/EndGameModal";
 import { Button } from "../../components/Button/Button";
 import { Card } from "../../components/Card/Card";
 import { useEasyMode } from "../../context/hooks/useEasyMode";
+import { useEpiphanyAchievement } from "../../context/hooks/useEpiphanyAchievement";
+import { ReactComponent as EpiphanySVG } from "./images/epiphanyPower.svg";
+import { Tooltip } from "../../components/Tooltip/Tooltip";
 
 // Игра закончилась
 const STATUS_LOST = "STATUS_LOST";
@@ -46,6 +49,7 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
   const [cards, setCards] = useState([]);
   // Текущий статус игры
   const [status, setStatus] = useState(STATUS_PREVIEW);
+  const [allOpenCards, setAllOpenCards] = useState([]);
 
   // Дата начала игры
   const [gameStartDate, setGameStartDate] = useState(null);
@@ -53,6 +57,8 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
   const [gameEndDate, setGameEndDate] = useState(null);
 
   const { isEasyMode } = useEasyMode();
+  const { hasEpiphanyAchievement, setEpiphanyAchievement } = useEpiphanyAchievement();
+
   let [attempts, setAttempts] = useState(isEasyMode ? 3 : 1);
 
   // Стейт для таймера, высчитывается в setInteval на основе gameStartDate и gameEndDate
@@ -61,10 +67,17 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
     minutes: 0,
   });
 
+  const [tooltip, setTooltip] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [tooltipPlacement, setTooltipPlacement] = useState("top");
+
+  const epiphanyRef = useRef(null);
+
   function finishGame(status = STATUS_LOST) {
     setGameEndDate(new Date());
     setStatus(status);
   }
+
   function startGame() {
     const startDate = new Date();
     setGameEndDate(null);
@@ -72,12 +85,18 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
     setTimer(getTimerValue(startDate, null));
     setStatus(STATUS_IN_PROGRESS);
   }
+
   function resetGame() {
     setGameStartDate(null);
     setGameEndDate(null);
     setTimer(getTimerValue(null, null));
     setStatus(STATUS_PREVIEW);
     setAttempts(isEasyMode ? 3 : 1);
+    setAllOpenCards([]);
+    setUsedBonuses([]);
+    if (hasEpiphanyAchievement) {
+      setEpiphanyAchievement(false);
+    }
   }
 
   /**
@@ -116,6 +135,7 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
 
     // Открытые карты на игровом поле
     const openCards = nextCards.filter(card => card.open);
+    setAllOpenCards(openCards);
 
     // Ищем открытые карты, у которых нет пары среди других открытых
     const openCardsWithoutPair = openCards.filter(card => {
@@ -147,6 +167,25 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
   };
 
   const isGameEnded = status === STATUS_LOST || status === STATUS_WON;
+  const [usedBonuses, setUsedBonuses] = useState([]);
+  const [epiphanyTime, setEpiphanyTime] = useState(false);
+
+  const epiphanyBonus = () => {
+    if (!usedBonuses.includes(1)) {
+      setUsedBonuses([...usedBonuses, 1]);
+      setEpiphanyTime(true);
+      setEpiphanyAchievement(true);
+
+      setCards(cards.map(card => ({ ...card, open: true })));
+      setTimeout(() => {
+        setCards(cards.map(card => (allOpenCards.includes(card) ? { ...card, open: true } : { ...card, open: false })));
+        setEpiphanyTime(false);
+        const newTimer = new Date(gameStartDate);
+        newTimer.setSeconds(newTimer.getSeconds() + 5);
+        setGameStartDate(newTimer);
+      }, 5000);
+    }
+  };
 
   // Игровой цикл
   useEffect(() => {
@@ -177,12 +216,24 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
   // Обновляем значение таймера в интервале
   useEffect(() => {
     const intervalId = setInterval(() => {
+      if (epiphanyTime) return;
       setTimer(getTimerValue(gameStartDate, gameEndDate));
     }, 300);
     return () => {
       clearInterval(intervalId);
     };
-  }, [gameStartDate, gameEndDate]);
+  }, [gameStartDate, gameEndDate, epiphanyTime]);
+
+  const handleMouseEnter = e => {
+    const { left, top, height } = epiphanyRef.current.getBoundingClientRect();
+    setTooltipPosition({ top: top + height + 15, left: left - 70 });
+    setTooltipPlacement("bottom");
+    setTooltip("На 5 секунд показываются все карты.  Таймер длительности игры на это время останавливается.");
+  };
+
+  const handleMouseLeave = () => {
+    setTooltip(null);
+  };
 
   return (
     <div className={styles.container}>
@@ -208,7 +259,15 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
           )}
         </div>
         {isEasyMode === true && status === STATUS_IN_PROGRESS ? (
-          <p className={styles.timerDescription}>Попыток осталось: {attempts} </p>
+          <p className={styles.timerDescription}>Жизни: {attempts} </p>
+        ) : null}
+        {status === STATUS_IN_PROGRESS ? (
+          <>
+            <div ref={epiphanyRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+              <EpiphanySVG className={usedBonuses.includes(1) ? styles.usedBonus : null} onClick={epiphanyBonus} />
+            </div>
+            {tooltip && <Tooltip text={tooltip} position={tooltipPosition} placement={tooltipPlacement} />}
+          </>
         ) : null}
         {status === STATUS_IN_PROGRESS ? <Button onClick={resetGame}>Начать заново</Button> : null}
       </div>
