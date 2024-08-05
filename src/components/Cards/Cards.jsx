@@ -6,6 +6,7 @@ import { EndGameModal } from "../../components/EndGameModal/EndGameModal";
 import { Button } from "../../components/Button/Button";
 import { Card } from "../../components/Card/Card";
 import { useEasyMode } from "../../context/hooks/useEasyMode";
+import { useEpiphanyAchievement } from "../../context/hooks/useEpiphanyAchievement";
 import { ReactComponent as EpiphanySVG } from "./images/epiphanyPower.svg";
 import { Tooltip } from "../../components/Tooltip/Tooltip";
 
@@ -56,10 +57,9 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
   const [gameEndDate, setGameEndDate] = useState(null);
 
   const { isEasyMode } = useEasyMode();
+  const { hasEpiphanyAchievement, setEpiphanyAchievement } = useEpiphanyAchievement();
 
   let [attempts, setAttempts] = useState(isEasyMode ? 3 : 1);
-
-  const [achievements, setAchievements] = useState(isEasyMode ? [2] : [1, 2]);
 
   // Стейт для таймера, высчитывается в setInteval на основе gameStartDate и gameEndDate
   const [timer, setTimer] = useState({
@@ -92,9 +92,11 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
     setTimer(getTimerValue(null, null));
     setStatus(STATUS_PREVIEW);
     setAttempts(isEasyMode ? 3 : 1);
-    setAchievements(isEasyMode ? [2] : [1, 2]);
     setAllOpenCards([]);
     setUsedBonuses([]);
+    if (hasEpiphanyAchievement) {
+      setEpiphanyAchievement(false);
+    }
   }
 
   /**
@@ -172,12 +174,7 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
     if (!usedBonuses.includes(1)) {
       setUsedBonuses([...usedBonuses, 1]);
       setEpiphanyTime(true);
-      setAchievements(prev => {
-        if (prev.includes(2)) {
-          prev.pop();
-        }
-        return prev;
-      });
+      setEpiphanyAchievement(true);
 
       setCards(cards.map(card => ({ ...card, open: true })));
       setTimeout(() => {
@@ -295,7 +292,6 @@ export function Cards({ pairsCount = 3, previewSeconds = 5 }) {
             gameDurationMinutes={timer.minutes}
             onClick={resetGame}
             game={pairsCount}
-            achievements={achievements}
           />
         </div>
       ) : null}

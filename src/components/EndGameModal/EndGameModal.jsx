@@ -4,9 +4,13 @@ import deadImageUrl from "./images/dead.png";
 import celebrationImageUrl from "./images/celebration.png";
 import { LeaderboardLink } from "../LeaderBoardLink/LeaderBoardLink";
 import { postLeader } from "../../api";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { EasyModeContext } from "../../context/easyMode";
+import { useEpiphanyAchievement } from "../../context/hooks/useEpiphanyAchievement";
 
-export function EndGameModal({ isWon, gameDurationSeconds, gameDurationMinutes, onClick, game, achievements }) {
+export function EndGameModal({ isWon, gameDurationSeconds, gameDurationMinutes, onClick, game }) {
+  const { isEasyMode } = useContext(EasyModeContext);
+  const { hasEpiphanyAchievement } = useEpiphanyAchievement();
   const title = isWon ? "Вы победили!" : "Вы проиграли!";
 
   const imgSrc = isWon ? celebrationImageUrl : deadImageUrl;
@@ -26,6 +30,13 @@ export function EndGameModal({ isWon, gameDurationSeconds, gameDurationMinutes, 
       return;
     }
     setErrorMessage("");
+    const achievements = [];
+    if (!isEasyMode) {
+      achievements.push(1);
+    }
+    if (!hasEpiphanyAchievement) {
+      achievements.push(2);
+    }
     postLeader({ name: leaderName, time: totalGameDuration, achievements })
       .then(() => {
         setIsSubmitted(true);
